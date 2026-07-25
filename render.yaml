@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: palworld-live-tracker
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: HOSTED_MODE
+        value: "1"
+      - key: TRACKER_USERNAME
+        value: tracker
+      - key: TRACKER_PASSWORD
+        sync: false
+      - key: PALWORLD_PROTOCOL
+        value: http
+      - key: PALWORLD_HOST
+        sync: false
+      - key: PALWORLD_PORT
+        value: "29148"
+      - key: PALWORLD_USERNAME
+        value: admin
+      - key: PALWORLD_PASSWORD
+        sync: false
+      - key: PALWORLD_POLL_INTERVAL_MS
+        value: "750"
+      - key: PALWORLD_REQUEST_TIMEOUT_MS
+        value: "5000"
