@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Palworld Live Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">PALWORLD 1.0</div>
+        <h1>Live World Tracker</h1>
+      </div>
+      <div class="status-cluster">
+        <span id="statusDot" class="status-dot offline"></span>
+        <span id="statusText">Connecting…</span>
+        <span id="fpsBadge" class="badge">FPS —</span>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="map-tabs">
+        <button class="tab active" data-area="MainMap" type="button">Palpagos</button>
+        <button class="tab" data-area="Tree" type="button">World Tree</button>
+      </div>
+
+      <label class="search-wrap">
+        <span>Search actor</span>
+        <input id="searchInput" type="search" placeholder="Jetragon, player name, class…">
+      </label>
+
+      <label class="follow-wrap">
+        <span>Follow player</span>
+        <select id="followSelect">
+          <option value="">Free camera</option>
+        </select>
+      </label>
+
+      <button id="fitButton" type="button">Fit map</button>
+    </section>
+
+    <section class="content">
+      <aside class="sidebar left-panel">
+        <div class="panel-section">
+          <h2>Layers</h2>
+          <label><input id="showPlayers" type="checkbox" checked> Players</label>
+          <label><input id="showWild" type="checkbox" checked> Wild Pals</label>
+          <label><input id="showCompanions" type="checkbox"> Companion Pals</label>
+          <label><input id="showBasePals" type="checkbox"> Base Pals</label>
+          <label><input id="showNpcs" type="checkbox"> NPCs</label>
+          <label><input id="showPalboxes" type="checkbox" checked> Palboxes</label>
+          <label><input id="aliveOnly" type="checkbox" checked> Alive only</label>
+          <label><input id="activeOnly" type="checkbox" checked> Active only</label>
+        </div>
+
+        <details class="panel-section tracker-panel" open>
+          <summary>Pal Tracker</summary>
+          <p class="muted small tracker-help">Filters apply to Wild Pals on the map, possible spawn locations, and spawn/current-world alerts.</p>
+
+          <div class="filter-group possible-spawn-filter">
+            <label class="possible-spawn-toggle">
+              <input id="showPossibleSpawns" type="checkbox">
+              <span><strong>Possible spawn locations</strong><small>Show faded ghost icons where selected Pals can spawn.</small></span>
+            </label>
+            <div id="possibleSpawnState" class="small muted">Loading spawn database…</div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading"><span>Pal species</span><strong id="speciesSelectedCount">All</strong></div>
+            <input id="speciesSearch" type="search" placeholder="Search all Pals…">
+            <div class="mini-buttons">
+              <button id="speciesAll" type="button">All</button>
+              <button id="speciesNone" type="button">None</button>
+            </div>
+            <div id="speciesList" class="filter-scroll muted">Loading Pal catalog…</div>
+
+            <div id="speciesEditor" class="species-editor hidden">
+              <div class="species-editor-head">
+                <img id="speciesEditorIcon" alt="" class="species-editor-icon">
+                <div>
+                  <strong id="speciesEditorName">Pal marker settings</strong>
+                  <div id="speciesEditorMeta" class="small muted"></div>
+                </div>
+              </div>
+
+              <label>
+                Marker style
+                <select id="speciesMarkerMode">
+                  <option value="icon-ring">Real icon + color ring</option>
+                  <option value="icon">Real icon only</option>
+                  <option value="dot">Colored dot</option>
+                </select>
+              </label>
+
+              <label>
+                Marker size
+                <div class="range-row">
+                  <input id="speciesMarkerSize" type="range" min="6" max="56" step="1" value="22">
+                  <output id="speciesMarkerSizeValue">22 px</output>
+                </div>
+              </label>
+
+              <label>
+                Marker color
+                <div class="color-row">
+                  <input id="speciesMarkerColor" type="color" value="#43c7a1">
+                  <span id="speciesMarkerColorValue">#43c7a1</span>
+                </div>
+              </label>
+
+              <label class="inline-check"><input id="speciesAlertsEnabled" type="checkbox" checked> Alerts enabled for this Pal</label>
+
+              <div class="mini-buttons">
+                <button id="speciesResetStyle" type="button">Reset marker</button>
+                <button id="speciesCloseEditor" type="button">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading"><span>Rarity</span><strong id="raritySelectedCount">All</strong></div>
+            <div id="rarityFilters" class="filter-grid muted">Loading…</div>
+            <p class="small muted rarity-note">Game rarity values: R1–4 Regular · R5–7 Large · R8–10/20 Huge.</p>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading"><span>Elements</span><strong id="elementSelectedCount">All</strong></div>
+            <div id="elementFilters" class="filter-grid muted">Loading…</div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-heading"><span>Special types</span></div>
+            <label><input id="typeNormal" type="checkbox" checked> Normal</label>
+            <label><input id="typeBoss" type="checkbox" checked> Boss / Alpha</label>
+            <label><input id="typeRaid" type="checkbox" checked> Raid boss</label>
+            <label><input id="typePredator" type="checkbox" checked> Predator</label>
+            <label><input id="typeUnknown" type="checkbox" checked> Unknown / unmatched</label>
+          </div>
+        </details>
+
+        <div class="panel-section metrics">
+          <h2>Live Snapshot</h2>
+          <div><span>Players</span><strong id="countPlayers">0</strong></div>
+          <div><span>Wild Pals</span><strong id="countWild">0</strong></div>
+          <div><span>Catalog matched</span><strong id="countMatchedPals">0</strong></div>
+          <div><span>Unmatched</span><strong id="countUnmatchedPals">0</strong></div>
+          <div><span>Actors</span><strong id="countActors">0</strong></div>
+          <div><span>Snapshot</span><strong id="snapshotTime">—</strong></div>
+        </div>
+
+        <div class="panel-section">
+          <h2>Players</h2>
+          <div id="playersList" class="players-list muted">No player data yet.</div>
+        </div>
+      </aside>
+
+      <div class="map-wrap">
+        <div id="mapHost" class="map-host"></div>
+        <div id="mapNotice" class="map-notice">Loading current Palworld 1.0 map…</div>
+        <div class="map-help">Drag to pan · Wheel to zoom · solid = live · faded/dashed = possible spawn</div>
+        <div id="hoverCard" class="hover-card hidden"></div>
+      </div>
+
+      <aside class="sidebar right-panel">
+        <div class="panel-section">
+          <h2>Pal Alerts</h2>
+          <p class="muted small">Alerts use the species, rarity, element, and special-type filters on the left.</p>
+          <label><input id="alertCurrent" type="checkbox" checked> Notify Pals already in the world</label>
+          <label><input id="alertSpawns" type="checkbox" checked> Notify new spawns</label>
+          <label><input id="desktopNotifications" type="checkbox"> Desktop notifications</label>
+          <label><input id="autoScanEnabled" type="checkbox" checked> Auto-scan current world</label>
+          <label class="scan-interval-label">
+            Auto-scan interval
+            <div class="scan-interval-row">
+              <input id="autoScanSeconds" type="number" min="2" max="3600" step="1" value="10">
+              <span>seconds</span>
+            </div>
+          </label>
+          <p class="small muted">Spawn alerts still react to every REST snapshot. Auto-scan rechecks already-loaded Pals on this interval without repeating the same InstanceID.</p>
+          <div class="button-row alert-buttons">
+            <button id="scanCurrent" type="button">Scan current world</button>
+            <button id="clearAlerts" type="button">Clear</button>
+          </div>
+          <div id="alertSummary" class="small muted alert-summary">Waiting for Pal catalog and snapshot…</div>
+          <div id="alertsList" class="alerts-list muted">Waiting for snapshot…</div>
+        </div>
+
+        <details class="panel-section settings">
+          <summary>Connection settings</summary>
+          <div id="deploymentConfigNotice" class="deployment-notice hidden"></div>
+          <label>Host <input id="cfgHost" type="text"></label>
+          <label>REST port <input id="cfgPort" type="number" min="1" max="65535"></label>
+          <label>Username <input id="cfgUser" type="text"></label>
+          <label>Admin password <input id="cfgPassword" type="password" placeholder="Saved password"></label>
+          <label>Poll interval (ms) <input id="cfgPoll" type="number" min="250" step="50"></label>
+          <div class="button-row">
+            <button id="saveConfig" type="button">Save</button>
+            <button id="testConnection" type="button">Test connection</button>
+          </div>
+          <button id="refreshMap" class="secondary" type="button">Re-download current maps</button>
+          <button id="refreshPalCatalog" class="secondary" type="button">Re-download Pal catalog</button>
+          <button id="refreshSpawnData" class="secondary" type="button">Refresh possible spawn database</button>
+          <pre id="connectionResult" class="result-box">Not tested yet.</pre>
+        </details>
+
+        <div class="panel-section">
+          <h2>Map source</h2>
+          <p class="small">
+            Current 1.0 Palpagos + World Tree textures and bounds are pulled from the
+            Palworld Save Pal project and cached locally on first launch.
+          </p>
+          <div id="mapAssetState" class="small muted">Checking map cache…</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>

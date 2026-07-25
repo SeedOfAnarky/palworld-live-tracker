@@ -1,0 +1,12 @@
+{
+  "name": "palworld-live-tracker",
+  "version": "0.8.0-render",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs --no-open"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
